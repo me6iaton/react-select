@@ -13,6 +13,7 @@ import defaultArrowRenderer from './utils/defaultArrowRenderer';
 import defaultFilterOptions from './utils/defaultFilterOptions';
 import defaultMenuRenderer from './utils/defaultMenuRenderer';
 import defaultClearRenderer from './utils/defaultClearRenderer';
+import defaultPlaceholderDisplay from './utils/defaultPlaceholderDisplay';
 
 import Option from './Option';
 import Value from './Value';
@@ -700,14 +701,19 @@ class Select extends React.Component {
 		);
 	}
 
+	renderPlaceholder(valueArray, isOpen) {
+		return this.props.placeholderDisplay(valueArray, isOpen, this.state.inputValue)
+			? <div className="Select-placeholder">{this.props.placeholder}</div>
+			: null;
+	}
+
 	renderValue (valueArray, isOpen) {
 		let renderLabel = this.props.valueRenderer || this.getOptionLabel;
 		let ValueComponent = this.props.valueComponent;
-		if (!valueArray.length) {
-			return !this.state.inputValue ? <div className="Select-placeholder">{this.props.placeholder}</div> : null;
-		}
 		let onClick = this.props.onValueClick ? this.handleValueClick : null;
-		if (this.props.multi) {
+		if (!valueArray.length) {
+			return null;
+		} else if (this.props.multi) {
 			return valueArray.map((value, i) => {
 				return (
 					<ValueComponent
@@ -1029,6 +1035,7 @@ class Select extends React.Component {
 					onTouchMove={this.handleTouchMove}
 				>
 					<span className="Select-multi-value-wrapper" id={this._instancePrefix + '-value'}>
+						{this.renderPlaceholder(valueArray, isOpen)}
 						{this.renderValue(valueArray, isOpen)}
 						{this.renderInput(valueArray, focusedOptionIndex)}
 					</span>
@@ -1103,6 +1110,7 @@ Select.propTypes = {
 	options: PropTypes.array,             // array of options
 	pageSize: PropTypes.number,           // number of entries to page when using page up/down keys
 	placeholder: stringOrNode,            // field placeholder, displayed when there's no value
+	placeholderDisplay: PropTypes.func,   // boolean to show placeholder (valueArray, isOpen, inputValue)
 	required: PropTypes.bool,             // applies HTML5 required attribute when needed
 	resetValue: PropTypes.any,            // value to use when you clear the control
 	scrollMenuIntoView: PropTypes.bool,   // boolean to enable the viewport to shift so that the full menu fully visible when engaged
@@ -1153,6 +1161,7 @@ Select.defaultProps = {
 	optionComponent: Option,
 	pageSize: 5,
 	placeholder: 'Select...',
+	placeholderDisplay: defaultPlaceholderDisplay,
 	required: false,
 	scrollMenuIntoView: true,
 	searchable: true,
