@@ -114,7 +114,10 @@ function clearRenderer() {
 	});
 }
 
-var babelHelpers = {};
+function defaultPlaceholderDisplay(valueArray, isOpen, inputValue) {
+	return !valueArray.length && !inputValue;
+}
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -344,28 +347,6 @@ var possibleConstructorReturn = function (self, call) {
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-babelHelpers;
 
 var Option = function (_React$Component) {
 	inherits(Option, _React$Component);
@@ -1368,21 +1349,25 @@ var Select$1 = function (_React$Component) {
 			);
 		}
 	}, {
+		key: 'renderPlaceholder',
+		value: function renderPlaceholder(valueArray, isOpen) {
+			return this.props.placeholderDisplay(valueArray, isOpen, this.state.inputValue) ? React.createElement(
+				'div',
+				{ className: 'Select-placeholder' },
+				this.props.placeholder
+			) : null;
+		}
+	}, {
 		key: 'renderValue',
 		value: function renderValue(valueArray, isOpen) {
 			var _this5 = this;
 
 			var renderLabel = this.props.valueRenderer || this.getOptionLabel;
 			var ValueComponent = this.props.valueComponent;
-			if (!valueArray.length) {
-				return !this.state.inputValue ? React.createElement(
-					'div',
-					{ className: 'Select-placeholder' },
-					this.props.placeholder
-				) : null;
-			}
 			var onClick = this.props.onValueClick ? this.handleValueClick : null;
-			if (this.props.multi) {
+			if (!valueArray.length) {
+				return null;
+			} else if (this.props.multi) {
 				return valueArray.map(function (value, i) {
 					return React.createElement(
 						ValueComponent,
@@ -1725,6 +1710,7 @@ var Select$1 = function (_React$Component) {
 					React.createElement(
 						'span',
 						{ className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },
+						this.renderPlaceholder(valueArray, isOpen),
 						this.renderValue(valueArray, isOpen),
 						this.renderInput(valueArray, focusedOptionIndex)
 					),
@@ -1733,7 +1719,7 @@ var Select$1 = function (_React$Component) {
 					this.renderClear(),
 					this.renderArrow()
 				),
-				isOpen ? this.renderOuter(options, !this.props.multi ? valueArray : null, focusedOption) : null
+				isOpen ? this.renderOuter(options, valueArray, focusedOption) : null
 			);
 		}
 	}]);
@@ -1802,6 +1788,7 @@ Select$1.propTypes = {
 	options: PropTypes.array, // array of options
 	pageSize: PropTypes.number, // number of entries to page when using page up/down keys
 	placeholder: stringOrNode, // field placeholder, displayed when there's no value
+	placeholderDisplay: PropTypes.func, // boolean to show placeholder (valueArray, isOpen, inputValue)
 	required: PropTypes.bool, // applies HTML5 required attribute when needed
 	resetValue: PropTypes.any, // value to use when you clear the control
 	scrollMenuIntoView: PropTypes.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
@@ -1852,6 +1839,7 @@ Select$1.defaultProps = {
 	optionComponent: Option,
 	pageSize: 5,
 	placeholder: 'Select...',
+	placeholderDisplay: defaultPlaceholderDisplay,
 	required: false,
 	scrollMenuIntoView: true,
 	searchable: true,
